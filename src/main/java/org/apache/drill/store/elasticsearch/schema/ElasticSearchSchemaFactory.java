@@ -16,16 +16,17 @@
  * limitations under the License.
  */
 
-package org.apache.drill.exec.elasticsearch.schema;
+package org.apache.drill.store.elasticsearch.schema;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.drill.exec.elasticsearch.ElasticSearchStoragePlugin;
+import org.apache.drill.store.elasticsearch.ElasticSearchStoragePlugin;
 import org.apache.drill.exec.store.SchemaConfig;
 import org.apache.drill.exec.store.SchemaFactory;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,22 +36,16 @@ public class ElasticSearchSchemaFactory implements SchemaFactory {
 
     private final String schemaName;
     private final ElasticSearchStoragePlugin plugin;
-    private final LoadingCache<String, List<String>> indexCache;
-    private final LoadingCache<String, List<String>> typeMappingCache;
+    private final LoadingCache<String, Collection<String>> indexCache;
 
-    public ElasticSearchSchemaFactory(ElasticSearchStoragePlugin plugin, String schemaName) {
+    public ElasticSearchSchemaFactory(ElasticSearchStoragePlugin plugin, String schemaName, long cacheDuration, TimeUnit cacheTimeUnit) {
         this.schemaName = schemaName;
         this.plugin = plugin;
 
         this.indexCache = CacheBuilder //
                 .newBuilder() //
-                .expireAfterAccess(5, TimeUnit.MINUTES) //
+                .expireAfterAccess(cacheDuration, cacheTimeUnit) //
                 .build(new ElasticSearchIndexLoader(this.plugin));
-
-        this.typeMappingCache = CacheBuilder //
-                .newBuilder() //
-                .expireAfterAccess(5, TimeUnit.MINUTES) //
-                .build(new ElasticSearchTypeMappingLoader(this.plugin));
     }
 
     @Override
@@ -61,13 +56,10 @@ public class ElasticSearchSchemaFactory implements SchemaFactory {
     }
 
 
-    public LoadingCache<String, List<String>> getIndexCache() {
+    public LoadingCache<String, Collection<String>> getIndexCache() {
         return this.indexCache;
     }
 
-    public LoadingCache<String, List<String>> getTypeMappingCache() {
-        return this.typeMappingCache;
-    }
 
     public String getSchemaName() {
         return this.schemaName;

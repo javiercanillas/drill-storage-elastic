@@ -16,22 +16,21 @@
  * limitations under the License.
  */
 
-package org.apache.drill.exec.elasticsearch.schema;
+package org.apache.drill.store.elasticsearch.schema;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 import org.apache.drill.common.exceptions.DrillRuntimeException;
-import org.apache.drill.exec.elasticsearch.ElasticSearchConstants;
+import org.apache.drill.store.elasticsearch.ElasticSearchConstants;
 
 import com.google.common.cache.CacheLoader;
-import com.mongodb.MongoException;
-import org.apache.drill.exec.elasticsearch.ElasticSearchStoragePlugin;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.apache.drill.store.elasticsearch.ElasticSearchStoragePlugin;
+import org.apache.drill.store.elasticsearch.JsonHelper;
+import org.elasticsearch.client.Response;
 
-public class ElasticSearchIndexLoader extends CacheLoader<String, List<String>> {
+public class ElasticSearchIndexLoader extends CacheLoader<String, Collection<String>> {
 
     static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ElasticSearchIndexLoader.class);
     private final ElasticSearchStoragePlugin plugin;
@@ -41,12 +40,24 @@ public class ElasticSearchIndexLoader extends CacheLoader<String, List<String>> 
     }
 
     @Override
-    public List<String> load(String key) throws Exception {
+    public Collection<String> load(String key) throws Exception {
         if (!ElasticSearchConstants.INDEXES.equals(key)) {
             throw new UnsupportedOperationException();
         }
+        Set<String> indexes = Sets.newHashSet();
         try {
-            return Arrays.asList(plugin.getClient().admin().indices().getIndex(new GetIndexRequest()).actionGet().indices());
+            Response response = this.plugin.getClient().performRequest("GET", "_/aliases");
+            JsonNode jsonNode = this.plugin.getObjectMapper().readTree(response.getEntity().getContent());
+            Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                JsonNode aliases = JsonHelper.getPath(entry.getValue(), "aliases");
+                Iterator<String> aliasesIterator = aliases.fieldNames();
+                while(aliasesIterator.hasNext()) {
+                    indexes.add(aliasesIterator.next());
+                }
+            }
+            return indexes;
         } catch (RuntimeException me) {
             logger.warn("Failure while loading indexes from ElasticSearch. {}",
                     me.getMessage());

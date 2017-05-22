@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.drill.exec.elasticsearch;
+package org.apache.drill.store.elasticsearch;
 
 
 public class ElasticSearchConstants {

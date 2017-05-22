@@ -15,49 +15,75 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.drill.exec.elasticsearch;
+package org.apache.drill.store.elasticsearch;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.drill.common.JSONOptions;
-import org.apache.drill.exec.elasticsearch.schema.ElasticSearchSchemaFactory;
+import org.apache.drill.store.elasticsearch.schema.ElasticSearchSchemaFactory;
 import org.apache.drill.exec.physical.base.AbstractGroupScan;
 import org.apache.drill.exec.server.DrillbitContext;
 import org.apache.drill.exec.store.AbstractStoragePlugin;
 import org.apache.drill.exec.store.SchemaConfig;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.client.RestClient;
+//import org.elasticsearch.client.Client;
+//import org.elasticsearch.client.transport.TransportClient;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+/**
+ * Main ElasticSearch Plugin class to configure storage instance
+ */
 public class ElasticSearchStoragePlugin extends AbstractStoragePlugin {
     static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ElasticSearchStoragePlugin.class);
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final String name;
     private final DrillbitContext context;
     private final ElasticSearchPluginConfig config;
     private final ElasticSearchSchemaFactory schemaFactory;
-    private TransportClient client;
+    private RestClient client;
 
+    /**
+     * Constructor of instance
+     * @param config configuration for this instance
+     * @param context drillbit context
+     * @param name name of the storagePlugin instance
+     * @throws IOException may be thrown in case construction of instance fails
+     */
     public ElasticSearchStoragePlugin(ElasticSearchPluginConfig config, DrillbitContext context, String name) throws IOException {
         this.context = context;
         this.name = name;
         this.config = config;
 
-        this.schemaFactory = new ElasticSearchSchemaFactory(this, name);
+        this.schemaFactory = new ElasticSearchSchemaFactory(this, name, this.config.getCacheDuration(), this.config.getCacheTimeUnit());
     }
 
+    /**
+     *
+     * @return return instance configuration
+     */
     @Override
     public ElasticSearchPluginConfig getConfig() {
         return this.config;
     }
 
+    /**
+     * {@inheritDoc}
+     * @param schemaConfig
+     * @param parent
+     * @throws IOException
+     */
     @Override
     public void registerSchemas(SchemaConfig schemaConfig, SchemaPlus parent) throws IOException {
         this.schemaFactory.registerSchemas(schemaConfig, parent);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean supportsRead() {
         return true;
@@ -88,9 +114,11 @@ public class ElasticSearchStoragePlugin extends AbstractStoragePlugin {
         return new ElasticSearchGroupScan(userName, this, elasticSearchScanSpec, null);
     }
 
-    public Client getClient() { return this.client; }
+    public RestClient getClient() { return this.client; }
 
     public ElasticSearchSchemaFactory getSchemaFactory() {
         return this.schemaFactory;
     }
+
+    public ObjectMapper getObjectMapper() { return OBJECT_MAPPER; }
 }

@@ -20,46 +20,27 @@
   <artifactId>drill-elasticsearch-storage</artifactId>
 
   <name>contrib/elasticsearch-storage-plugin</name>
-  
-  <properties>
-    <elasticsearch.transport.version>5.3.1</elasticsearch.transport.version>
-  </properties>
+
 
   <dependencies>
     <dependency>
       <groupId>org.apache.drill.exec</groupId>
       <artifactId>drill-java-exec</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
+
 
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
-      <artifactId>transport</artifactId>
-      <version>${elasticsearch.transport.version}</version>
+      <artifactId>rest</artifactId>
+      <version>5.3.1</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
           <artifactId>commons-logging</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.elasticsearch.client</groupId>
-      <artifactId>x-pack-transport</artifactId>
-      <version>${elasticsearch.transport.version}</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <!-- needed to replace elasticSearch commons-logging dependency -->
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-to-slf4j</artifactId>
-      <version>2.8.2</version>
     </dependency>
 
     <!-- Test dependencies -->
@@ -79,25 +60,43 @@
     </dependency>
   </dependencies>
 
-  <repositories>
-   <repository>
-    <!-- needed for elastic security (xpack) -->
-      <id>elasticsearch-releases</id>
-      <url>https://artifacts.elastic.co/maven</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>cdh.repo</id>
-      <name>Cloudera Repositories</name>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+<!--
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.4.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <!- - exclude all parent dependencies only to build fat-jar - ->
+                <excludes>
+                  <exclude>org.apache.drill.exec:drill-java-exec</exclude>
+                  <exclude>io-netty:netty-handler</exclude>
+                  <exclude>com.google.guava:guava</exclude>
+                  <exclude>org.slf4j:*</exclude>
+                  <exclude>commons-io:commons-io</exclude>
+                  <exclude>org.mockito:*</exclude>
+                  <exclude>org.xerial.snappy:*</exclude>
+                  <exclude>org.apache.kerby:*</exclude>
+                </excludes>
+              </artifactSet>
+              <!- - <minimizeJar>true</minimizeJar> - ->
+              <!- - See https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/_embedding_jar_with_dependencies.html - ->
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  -->
 </project>

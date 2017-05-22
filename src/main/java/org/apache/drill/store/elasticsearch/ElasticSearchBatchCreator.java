@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.drill.exec.elasticsearch;
+package org.apache.drill.store.elasticsearch;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;

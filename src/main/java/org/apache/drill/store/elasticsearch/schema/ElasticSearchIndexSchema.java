@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-package org.apache.drill.exec.elasticsearch.schema;
+package org.apache.drill.store.elasticsearch.schema;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.calcite.schema.Table;
-import org.apache.drill.exec.elasticsearch.ElasticSearchPluginConfig;
+import org.apache.drill.store.elasticsearch.ElasticSearchPluginConfig;
 import org.apache.drill.exec.planner.logical.DrillTable;
 import org.apache.drill.exec.store.AbstractSchema;
 

@@ -16,24 +16,21 @@
  * limitations under the License.
  */
 
-package org.apache.drill.exec.elasticsearch.schema;
+package org.apache.drill.store.elasticsearch.schema;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.drill.exec.elasticsearch.ElasticSearchConstants;
-import org.apache.drill.exec.elasticsearch.ElasticSearchPluginConfig;
-import org.apache.drill.exec.elasticsearch.ElasticSearchScanSpec;
-import org.apache.drill.exec.elasticsearch.ElasticSearchStoragePlugin;
+import org.apache.drill.store.elasticsearch.ElasticSearchConstants;
+import org.apache.drill.store.elasticsearch.ElasticSearchPluginConfig;
+import org.apache.drill.store.elasticsearch.ElasticSearchScanSpec;
+import org.apache.drill.store.elasticsearch.ElasticSearchStoragePlugin;
 import org.apache.drill.exec.planner.logical.DrillTable;
 import org.apache.drill.exec.planner.logical.DynamicDrillTable;
 import org.apache.drill.exec.store.AbstractSchema;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class ElasticSearchSchema extends AbstractSchema {
@@ -55,19 +52,20 @@ public class ElasticSearchSchema extends AbstractSchema {
 
     @Override
     public AbstractSchema getSubSchema(String name) {
+        //TODO: Ver esto
         List<String> typeMappings;
-        try {
+        //try {
             if ( !this.schemaMap.containsKey(name)){
-                typeMappings = this.plugin.getSchemaFactory().getTypeMappingCache().get(name);
+                typeMappings = null; //this.plugin.getSchemaFactory().getTypeMappingCache().get(name);
                 this.schemaMap.put(name, new ElasticSearchIndexSchema(typeMappings, this, name));
             }
 
             return this.schemaMap.get(name);
-        } catch (ExecutionException e) {
-            logger.warn("Failure while attempting to access ElasticSearch Index '{}'.",
-                    name, e.getCause());
-            return null;
-        }
+        //} catch (ExecutionException e) {
+        //    logger.warn("Failure while attempting to access ElasticSearch Index '{}'.",
+        //            name, e.getCause());
+        //    return null;
+        //}
     }
 
     void setHolder(SchemaPlus plusOfThis) {
@@ -84,8 +82,7 @@ public class ElasticSearchSchema extends AbstractSchema {
     @Override
     public Set<String> getSubSchemaNames() {
         try {
-            List<String> dbs = this.plugin.getSchemaFactory().getIndexCache().get(ElasticSearchConstants.INDEXES);
-            return Sets.newHashSet(dbs);
+            return Sets.newHashSet(this.plugin.getSchemaFactory().getIndexCache().get(ElasticSearchConstants.INDEXES));
         } catch (ExecutionException e) {
             logger.warn("Failure while getting ElasticSearch index list.", e);
             return Collections.emptySet();
