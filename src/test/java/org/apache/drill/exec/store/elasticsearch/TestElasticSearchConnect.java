@@ -16,11 +16,9 @@
  * limitations under the License.
  */
 
-package org.apache.drill.store.elasticsearch;
+package org.apache.drill.exec.store.elasticsearch;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import junit.framework.TestCase;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
@@ -33,11 +31,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
-
-import static org.bouncycastle.crypto.tls.ConnectionEnd.client;
 
 @Ignore("requires remote ElasticSearch server")
 public class TestElasticSearchConnect {

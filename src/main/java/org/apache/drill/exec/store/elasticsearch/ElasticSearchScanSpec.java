@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.drill.store.elasticsearch;
+package org.apache.drill.exec.store.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

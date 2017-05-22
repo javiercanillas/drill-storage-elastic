@@ -16,18 +16,17 @@
  * limitations under the License.
  */
 
-package org.apache.drill.store.elasticsearch.schema;
+package org.apache.drill.exec.store.elasticsearch.schema;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.drill.store.elasticsearch.ElasticSearchStoragePlugin;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchStoragePlugin;
 import org.apache.drill.exec.store.SchemaConfig;
 import org.apache.drill.exec.store.SchemaFactory;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ElasticSearchSchemaFactory implements SchemaFactory {

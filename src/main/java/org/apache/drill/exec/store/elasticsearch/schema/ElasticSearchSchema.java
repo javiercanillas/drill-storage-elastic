@@ -16,16 +16,16 @@
  * limitations under the License.
  */
 
-package org.apache.drill.store.elasticsearch.schema;
+package org.apache.drill.exec.store.elasticsearch.schema;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.drill.store.elasticsearch.ElasticSearchConstants;
-import org.apache.drill.store.elasticsearch.ElasticSearchPluginConfig;
-import org.apache.drill.store.elasticsearch.ElasticSearchScanSpec;
-import org.apache.drill.store.elasticsearch.ElasticSearchStoragePlugin;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchPluginConfig;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchStoragePlugin;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchConstants;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchScanSpec;
 import org.apache.drill.exec.planner.logical.DrillTable;
 import org.apache.drill.exec.planner.logical.DynamicDrillTable;
 import org.apache.drill.exec.store.AbstractSchema;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.drill.store.elasticsearch;
+package org.apache.drill.exec.store.elasticsearch;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -54,6 +53,9 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
     public static final String NAME = "elasticsearch";
     static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ElasticSearchPluginConfig.class);
     private static final int DEFAULT_PORT = 9200;
+    private static final long DEFAULT_CACHE_DURATION = 5;
+    private static final TimeUnit DEFAULT_CACHE_TIMEUNIT = TimeUnit.MINUTES;
+
     private final String hostsAndPorts;
     private final String credentials;
     private final String pathPrefix;
@@ -68,12 +70,12 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
      * @param credentials its format should be "[USERNAME]:[PASSWORD]". For example: 'me:myPassword'. In case of null or empty String, no Authorization will be used
      * @param hostsAndPorts its format is a list of a [PROTOCOL]://[HOST]:[PORT] separated by ','. For example: 'http://localhost:9200,http://localhost:9201'
      */
-    public ElasticSearchPluginConfig(@JsonProperty(value = "credentials", defaultValue = "") String credentials,
+    public ElasticSearchPluginConfig(@JsonProperty(value = "credentials") String credentials,
                                      @JsonProperty(value = "hostsAndPorts", required = true) String hostsAndPorts,
                                      @JsonProperty(value = "pathPrefix") String pathPrefix,
-                                     @JsonProperty(value = "maxRetryTimeoutMillis", defaultValue = "-1") int maxRetryTimeoutMillis,
-                                     @JsonProperty(value = "cacheDuration", defaultValue = "5") long cacheDuration,
-                                     @JsonProperty(value = "cacheTimeUnit", defaultValue = "MINUTES") TimeUnit cacheTimeUnit) {
+                                     @JsonProperty(value = "maxRetryTimeoutMillis") int maxRetryTimeoutMillis,
+                                     @JsonProperty(value = "cacheDuration") long cacheDuration,
+                                     @JsonProperty(value = "cacheTimeUnit") TimeUnit cacheTimeUnit) {
         if (!StringUtils.isEmpty(credentials)) {
             this.credentials = credentials;
         } else {
@@ -82,8 +84,18 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
         this.hostsAndPorts = hostsAndPorts;
         this.maxRetryTimeoutMillis = maxRetryTimeoutMillis;
         this.pathPrefix = pathPrefix;
-        this.cacheDuration = cacheDuration;
-        this.cacheTimeUnit = cacheTimeUnit;
+
+        if (cacheDuration > 0) {
+            this.cacheDuration = cacheDuration;
+        } else {
+            this.cacheDuration = DEFAULT_CACHE_DURATION;
+        }
+
+        if (cacheTimeUnit != null) {
+            this.cacheTimeUnit = cacheTimeUnit;
+        } else {
+            this.cacheTimeUnit = DEFAULT_CACHE_TIMEUNIT;
+        }
 
         // Building hashcode
         HashCodeBuilder builder = new HashCodeBuilder(13,7);
@@ -107,7 +119,9 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
         return this.hostsAndPorts.equals(thatConfig.hostsAndPorts)
                 && (this.credentials == null ? thatConfig.credentials == null : this.credentials.equals(thatConfig.credentials))
                 && this.maxRetryTimeoutMillis == thatConfig.maxRetryTimeoutMillis
-                && (this.pathPrefix == null ? thatConfig.pathPrefix == null : this.pathPrefix.equals(thatConfig.pathPrefix));
+                && this.cacheDuration == thatConfig.cacheDuration
+                && (this.pathPrefix == null ? thatConfig.pathPrefix == null : this.pathPrefix.equals(thatConfig.pathPrefix))
+                && (this.cacheTimeUnit == null ? thatConfig.cacheTimeUnit == null : this.cacheTimeUnit.equals(thatConfig.cacheTimeUnit));
     }
 
     @Override
@@ -144,7 +158,7 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
         if (headers != null) {
             clientBuilder.setDefaultHeaders(headers);
         }
-        if (this.maxRetryTimeoutMillis >= 0) {
+        if (this.maxRetryTimeoutMillis > 0) {
             clientBuilder.setMaxRetryTimeoutMillis(this.maxRetryTimeoutMillis);
         }
         if (!StringUtils.isEmpty(this.pathPrefix)) {

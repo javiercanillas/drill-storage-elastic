@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.drill.store.elasticsearch;
+package org.apache.drill.exec.store.elasticsearch;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.drill.common.JSONOptions;
-import org.apache.drill.store.elasticsearch.schema.ElasticSearchSchemaFactory;
+import org.apache.drill.exec.store.elasticsearch.schema.ElasticSearchSchemaFactory;
 import org.apache.drill.exec.physical.base.AbstractGroupScan;
 import org.apache.drill.exec.server.DrillbitContext;
 import org.apache.drill.exec.store.AbstractStoragePlugin;
@@ -31,7 +31,6 @@ import org.elasticsearch.client.RestClient;
 //import org.elasticsearch.client.transport.TransportClient;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Main ElasticSearch Plugin class to configure storage instance

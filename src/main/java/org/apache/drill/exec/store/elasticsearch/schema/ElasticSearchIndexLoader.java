@@ -16,18 +16,18 @@
  * limitations under the License.
  */
 
-package org.apache.drill.store.elasticsearch.schema;
+package org.apache.drill.exec.store.elasticsearch.schema;
 
 import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import org.apache.drill.common.exceptions.DrillRuntimeException;
-import org.apache.drill.store.elasticsearch.ElasticSearchConstants;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchConstants;
 
 import com.google.common.cache.CacheLoader;
-import org.apache.drill.store.elasticsearch.ElasticSearchStoragePlugin;
-import org.apache.drill.store.elasticsearch.JsonHelper;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchStoragePlugin;
+import org.apache.drill.exec.store.elasticsearch.JsonHelper;
 import org.elasticsearch.client.Response;
 
 public class ElasticSearchIndexLoader extends CacheLoader<String, Collection<String>> {

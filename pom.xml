@@ -30,6 +30,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.drill.contrib</groupId>
+      <artifactId>drill-mongo-storage</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
