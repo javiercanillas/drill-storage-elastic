@@ -39,10 +39,10 @@ public class JsonHelper {
     public static JsonNode getPath(@NotNull JsonNode node, @NotNull  String path) {
         Preconditions.checkArgument(node != null);
         Preconditions.checkArgument(path != null);
-        Iterator<String> fieldIterator = Arrays.asList(path.split(".")).iterator();
+        Iterator<String> fieldIterator = Arrays.asList(path.split("\\.")).iterator();
         JsonNode innerNode = node;
         while (!innerNode.isMissingNode() && fieldIterator.hasNext()) {
-            node = node.get(fieldIterator.next());
+            node = node.path(fieldIterator.next());
         }
 
         return node;

@@ -181,14 +181,14 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
         for (String hostPort : hostPortList) {
             String[] split = hostPort.split(":");
             String protocol = split[0];
-            String host = split[1];
+            String host = split[1].replaceAll("/","");
             int port = DEFAULT_PORT;
             if (split.length > 2) {
                 port = Integer.parseInt(split[2]);
             }
             rtnValue.add(new HttpHost(host, port, protocol));
         }
-        return (HttpHost[]) rtnValue.toArray();
+        return rtnValue.toArray(new HttpHost[0]);
     }
 
     public long getCacheDuration() {

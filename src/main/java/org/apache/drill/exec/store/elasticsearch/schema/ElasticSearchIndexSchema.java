@@ -25,6 +25,7 @@ import org.apache.drill.exec.store.elasticsearch.ElasticSearchPluginConfig;
 import org.apache.drill.exec.planner.logical.DrillTable;
 import org.apache.drill.exec.store.AbstractSchema;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class ElasticSearchIndexSchema extends AbstractSchema {
 
     private final Map<String, DrillTable> drillTables = Maps.newHashMap();
 
-    public ElasticSearchIndexSchema(List<String> typeMappings, ElasticSearchSchema elasticSearchSchema, String name) {
+    public ElasticSearchIndexSchema(Collection<String> typeMappings, ElasticSearchSchema elasticSearchSchema, String name) {
         super(elasticSearchSchema.getSchemaPath(), name);
         this.elasticSearchSchema = elasticSearchSchema;
         this.typeMappings = Sets.newHashSet(typeMappings);

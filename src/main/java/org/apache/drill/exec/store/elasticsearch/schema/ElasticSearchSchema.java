@@ -52,20 +52,19 @@ public class ElasticSearchSchema extends AbstractSchema {
 
     @Override
     public AbstractSchema getSubSchema(String name) {
-        //TODO: Ver esto
-        List<String> typeMappings;
-        //try {
+        Collection<String> typeMappings;
+        try {
             if ( !this.schemaMap.containsKey(name)){
-                typeMappings = null; //this.plugin.getSchemaFactory().getTypeMappingCache().get(name);
+                typeMappings = this.plugin.getSchemaFactory().getTypeMappingCache().get(name);
                 this.schemaMap.put(name, new ElasticSearchIndexSchema(typeMappings, this, name));
             }
 
             return this.schemaMap.get(name);
-        //} catch (ExecutionException e) {
-        //    logger.warn("Failure while attempting to access ElasticSearch Index '{}'.",
-        //            name, e.getCause());
-        //    return null;
-        //}
+        } catch (ExecutionException e) {
+            logger.warn("Failure while attempting to access ElasticSearch Index '{}'.",
+                    name, e.getCause());
+            return null;
+        }
     }
 
     void setHolder(SchemaPlus plusOfThis) {

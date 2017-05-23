@@ -21,8 +21,13 @@ package org.apache.drill.exec.store.elasticsearch;
 
 import org.apache.drill.PlanTestBase;
 import org.apache.drill.common.exceptions.ExecutionSetupException;
+import org.apache.drill.exec.exception.SchemaChangeException;
+import org.apache.drill.exec.rpc.user.QueryDataBatch;
 import org.apache.drill.exec.store.StoragePluginRegistry;
+import org.junit.Assert;
 import org.junit.BeforeClass;
+
+import java.util.List;
 
 public class ElasticTestBase extends PlanTestBase {
 
@@ -41,4 +46,24 @@ public class ElasticTestBase extends PlanTestBase {
         storagePluginConfig.setEnabled(true);
         pluginRegistry.createOrUpdate(ElasticSearchPluginConfig.NAME, storagePluginConfig, true);
     }
+
+    public void runElasticSearchSQLVerifyCount(String sql, int expectedRowCount)
+            throws Exception {
+        List<QueryDataBatch> results = runElasticSearchSQLWithResults(sql);
+        printResultAndVerifyRowCount(results, expectedRowCount);
+    }
+
+    public List<QueryDataBatch> runElasticSearchSQLWithResults(String sql)
+            throws Exception {
+        return testSqlWithResults(sql);
+    }
+
+    public void printResultAndVerifyRowCount(List<QueryDataBatch> results,
+                                             int expectedRowCount) throws SchemaChangeException {
+        int rowCount = printResult(results);
+        if (expectedRowCount != -1) {
+            Assert.assertEquals(expectedRowCount, rowCount);
+        }
+    }
+
 }

@@ -90,10 +90,11 @@ public class ElasticSearchStoragePlugin extends AbstractStoragePlugin {
 
     @Override
     public void start() throws IOException {
-        if (this.client != null) {
+        if (this.client == null) {
             this.client = this.config.createClient();
+            logger.debug("Client created");
         } else {
-            logger.warn("Already started");
+            logger.warn("Already created");
         }
     }
 
@@ -102,8 +103,9 @@ public class ElasticSearchStoragePlugin extends AbstractStoragePlugin {
         if (this.client != null) {
             this.client.close();
             this.client = null;
+            logger.debug("Client closed");
         } else {
-            logger.warn("Not started or already closed");
+            logger.warn("Client not started or already closed");
         }
     }
 

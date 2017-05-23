@@ -36,6 +36,7 @@ public class ElasticSearchSchemaFactory implements SchemaFactory {
     private final String schemaName;
     private final ElasticSearchStoragePlugin plugin;
     private final LoadingCache<String, Collection<String>> indexCache;
+    private final LoadingCache<String, Collection<String>> typeMappingCache;
 
     public ElasticSearchSchemaFactory(ElasticSearchStoragePlugin plugin, String schemaName, long cacheDuration, TimeUnit cacheTimeUnit) {
         this.schemaName = schemaName;
@@ -45,6 +46,11 @@ public class ElasticSearchSchemaFactory implements SchemaFactory {
                 .newBuilder() //
                 .expireAfterAccess(cacheDuration, cacheTimeUnit) //
                 .build(new ElasticSearchIndexLoader(this.plugin));
+
+        this.typeMappingCache = CacheBuilder //
+                .newBuilder() //
+                .expireAfterAccess(cacheDuration, cacheTimeUnit) //
+                .build(new ElasticSearchTypeMappingLoader(this.plugin));
     }
 
     @Override
@@ -59,6 +65,9 @@ public class ElasticSearchSchemaFactory implements SchemaFactory {
         return this.indexCache;
     }
 
+    public LoadingCache<String, Collection<String>> getTypeMappingCache() {
+        return this.typeMappingCache;
+    }
 
     public String getSchemaName() {
         return this.schemaName;

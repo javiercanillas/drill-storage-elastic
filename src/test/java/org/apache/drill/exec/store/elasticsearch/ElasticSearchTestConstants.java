@@ -18,24 +18,10 @@
 
 package org.apache.drill.exec.store.elasticsearch;
 
-import org.junit.Ignore;
-import org.junit.Test;
+public class ElasticSearchTestConstants {
 
-@Ignore
-public class TestElasticQueries extends ElasticTestBase {
-
-    @Test
-    public void testPluginIsLoaded() {
-        //DO NOTHING
-    }
-
-    @Test
-    public void testBooleanFilter() throws Exception {
-        String queryString = String.format(ElasticSearchTestConstants.TEST_BOOLEAN_FILTER_QUERY_TEMPLATE1,
-                ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.EMPINFO_MAPPING);
-        runElasticSearchSQLVerifyCount(queryString, 11);
-        queryString = String.format(ElasticSearchTestConstants.TEST_BOOLEAN_FILTER_QUERY_TEMPLATE2,
-                ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.EMPINFO_MAPPING);
-        runElasticSearchSQLVerifyCount(queryString, 8);
-    }
+    public static final String TEST_BOOLEAN_FILTER_QUERY_TEMPLATE1 = "select count(*) from elasticsearch.%s.`%s`";
+    public static final String EMPLOYEE_IDX = "employee";
+    public static final String EMPINFO_MAPPING = "employee";
+    public static final String TEST_BOOLEAN_FILTER_QUERY_TEMPLATE2 = "select `employee_id` from elasticsearch.%s.`%s` where isFTE = false";
 }

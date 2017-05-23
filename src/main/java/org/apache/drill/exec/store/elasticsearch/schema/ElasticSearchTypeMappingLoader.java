@@ -18,52 +18,49 @@
 
 package org.apache.drill.exec.store.elasticsearch.schema;
 
-import java.util.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.cache.CacheLoader;
 import com.google.common.collect.Sets;
 import org.apache.drill.common.exceptions.DrillRuntimeException;
 import org.apache.drill.exec.store.elasticsearch.ElasticSearchConstants;
-
-import com.google.common.cache.CacheLoader;
 import org.apache.drill.exec.store.elasticsearch.ElasticSearchStoragePlugin;
 import org.apache.drill.exec.store.elasticsearch.JsonHelper;
 import org.elasticsearch.client.Response;
 
-public class ElasticSearchIndexLoader extends CacheLoader<String, Collection<String>> {
+import java.util.*;
 
-    static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ElasticSearchIndexLoader.class);
+public class ElasticSearchTypeMappingLoader extends CacheLoader<String, Collection<String>> {
+
+    static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ElasticSearchTypeMappingLoader.class);
     private final ElasticSearchStoragePlugin plugin;
 
-    public ElasticSearchIndexLoader(ElasticSearchStoragePlugin plugin) {
+    public ElasticSearchTypeMappingLoader(ElasticSearchStoragePlugin plugin)  {
         this.plugin = plugin;
     }
 
     @Override
-    public Collection<String> load(String key) throws Exception {
-        if (!ElasticSearchConstants.INDEXES.equals(key)) {
-            throw new UnsupportedOperationException();
-        }
-        Set<String> indexes = Sets.newHashSet();
+    public Collection<String> load(String idxName) throws Exception {
+        Set<String> typeMappings = Sets.newHashSet();
         try {
-            Response response = this.plugin.getClient().performRequest("GET", "/_aliases");
+            Response response = this.plugin.getClient().performRequest("GET", "/" + idxName);
             JsonNode jsonNode = this.plugin.getObjectMapper().readTree(response.getEntity().getContent());
             Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> entry = fields.next();
-                JsonNode aliases = JsonHelper.getPath(entry.getValue(), "aliases");
-                if (!aliases.isMissingNode()) {
-                    Iterator<String> aliasesIterator = aliases.fieldNames();
+                JsonNode mappings = JsonHelper.getPath(entry.getValue(), "mappings");
+                if (!mappings.isMissingNode()) {
+                    Iterator<String> aliasesIterator = mappings.fieldNames();
                     while (aliasesIterator.hasNext()) {
-                        indexes.add(aliasesIterator.next());
+                        typeMappings.add(aliasesIterator.next());
                     }
                 } else {
-                    indexes.add(entry.getKey());
+                    logger.warn("No typeMappings on {}", idxName);
+                    //typeMappings.add(entry.getKey());
                 }
             }
-            return indexes;
+            return typeMappings;
         } catch (RuntimeException me) {
-            logger.warn("Failure while loading indexes from ElasticSearch. {}",
+            logger.warn("Failure while loading typeMappings from ElasticSearch. {}",
                     me.getMessage());
             return Collections.emptyList();
         } catch (Exception e) {
