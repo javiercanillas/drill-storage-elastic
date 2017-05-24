@@ -22,6 +22,7 @@ public class ElasticSearchTestConstants {
 
     public static final String TEST_BOOLEAN_FILTER_QUERY_TEMPLATE1 = "select count(*) from elasticsearch.%s.`%s`";
     public static final String EMPLOYEE_IDX = "employee";
-    public static final String EMPINFO_MAPPING = "employee";
-    public static final String TEST_BOOLEAN_FILTER_QUERY_TEMPLATE2 = "select `employee_id` from elasticsearch.%s.`%s` where isFTE = false";
+    public static final String DEVELOPER_MAPPING = "developer";
+    public static final String MANAGER_MAPPING = "manager";
+    public static final String TEST_BOOLEAN_FILTER_QUERY_TEMPLATE2 = "select `employeeId` from elasticsearch.%s.`%s` where reportsTo = false";
 }

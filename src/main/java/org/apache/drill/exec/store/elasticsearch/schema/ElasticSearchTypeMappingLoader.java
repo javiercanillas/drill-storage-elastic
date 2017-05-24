@@ -49,13 +49,18 @@ public class ElasticSearchTypeMappingLoader extends CacheLoader<String, Collecti
                 Map.Entry<String, JsonNode> entry = fields.next();
                 JsonNode mappings = JsonHelper.getPath(entry.getValue(), "mappings");
                 if (!mappings.isMissingNode()) {
-                    Iterator<String> aliasesIterator = mappings.fieldNames();
-                    while (aliasesIterator.hasNext()) {
-                        typeMappings.add(aliasesIterator.next());
+                    Iterator<String> typeMappingIterator = mappings.fieldNames();
+                    while (typeMappingIterator.hasNext()) {
+                        String typeMapping = typeMappingIterator.next();
+                        if (!ElasticSearchConstants.DEFAULT_MAPPING.equals(typeMapping)) {
+                            typeMappings.add(typeMapping);
+                        } else {
+                            logger.debug("Found default mapping on {}, skipping it", idxName);
+                        }
                     }
                 } else {
                     logger.warn("No typeMappings on {}", idxName);
-                    //typeMappings.add(entry.getKey());
+                    typeMappings.add(entry.getKey());
                 }
             }
             return typeMappings;

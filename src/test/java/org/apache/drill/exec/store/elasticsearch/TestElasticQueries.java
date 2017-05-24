@@ -21,7 +21,7 @@ package org.apache.drill.exec.store.elasticsearch;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
+@Ignore("It requires an elasticsearch server running on localhost, port 9200 with init-script.sh script run on it")
 public class TestElasticQueries extends ElasticTestBase {
 
     @Test
@@ -32,10 +32,10 @@ public class TestElasticQueries extends ElasticTestBase {
     @Test
     public void testBooleanFilter() throws Exception {
         String queryString = String.format(ElasticSearchTestConstants.TEST_BOOLEAN_FILTER_QUERY_TEMPLATE1,
-                ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.EMPINFO_MAPPING);
+                ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.DEVELOPER_MAPPING);
         runElasticSearchSQLVerifyCount(queryString, 11);
         queryString = String.format(ElasticSearchTestConstants.TEST_BOOLEAN_FILTER_QUERY_TEMPLATE2,
-                ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.EMPINFO_MAPPING);
+                ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.DEVELOPER_MAPPING);
         runElasticSearchSQLVerifyCount(queryString, 8);
     }
 }

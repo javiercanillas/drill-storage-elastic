@@ -57,7 +57,7 @@ public class ElasticSearchTypeMappingsLoaderTest {
         Response mockResponse = Mockito.mock(Response.class);
         HttpEntity mockEntity = Mockito.mock(HttpEntity.class);
         Mockito.when(mockResponse.getEntity()).thenReturn(mockEntity);
-        InputStream responseContent = IOUtils.toInputStream("{\"employee\":{\"aliases\":{},\"mappings\":{\"_default_\":{\"dynamic_templates\":[{\"disable_string_analyzing\":{\"match\":\"*\",\"match_mapping_type\":\"string\",\"mapping\":{\"index\":\"not_analyzed\",\"type\":\"string\"}}},{\"avoid_parsing_raws\":{\"match\":\"*Raw\",\"mapping\":{\"index\":\"not_analyzed\",\"type\":\"string\"}}}]}},\"settings\":{\"index\":{\"mapping\":{\"total_fields\":{\"limit\":\"10000\"}},\"number_of_shards\":\"11\",\"provided_name\":\"employee\",\"creation_date\":\"1491328427846\",\"number_of_replicas\":\"2\",\"uuid\":\"2WLTEDl6RAidfOPRsLwDZw\",\"version\":{\"created\":\"5030099\"}}}}}");
+        InputStream responseContent = IOUtils.toInputStream("{\"employee\":{\"aliases\":{},\"mappings\":{\"developer\":{\"dynamic_templates\":[{\"disable_string_analyzing\":{\"match\":\"*\",\"match_mapping_type\":\"string\",\"mapping\":{\"index\":\"not_analyzed\",\"type\":\"string\"}}},{\"avoid_parsing_raws\":{\"match\":\"*Raw\",\"mapping\":{\"index\":\"not_analyzed\",\"type\":\"string\"}}}]}},\"settings\":{\"index\":{\"mapping\":{\"total_fields\":{\"limit\":\"10000\"}},\"number_of_shards\":\"11\",\"provided_name\":\"employee\",\"creation_date\":\"1491328427846\",\"number_of_replicas\":\"2\",\"uuid\":\"2WLTEDl6RAidfOPRsLwDZw\",\"version\":{\"created\":\"5030099\"}}}}}");
         try {
             Mockito.when(mockEntity.getContent()).thenReturn(responseContent);
             Mockito.when(this.restClient.performRequest("GET", "/" + "employee")).thenReturn(mockResponse);
@@ -65,7 +65,25 @@ public class ElasticSearchTypeMappingsLoaderTest {
             ElasticSearchTypeMappingLoader esil = new ElasticSearchTypeMappingLoader(this.plugin);
             Collection<String> load = esil.load("employee");
             TestCase.assertEquals(1, load.size());
-            TestCase.assertTrue(load.contains("_default_"));
+            TestCase.assertTrue(load.contains("developer"));
+        } finally {
+            IOUtils.closeQuietly(responseContent);
+        }
+    }
+
+    @Test
+    public void getNoTypeMappingsOk() throws Exception {
+        Response mockResponse = Mockito.mock(Response.class);
+        HttpEntity mockEntity = Mockito.mock(HttpEntity.class);
+        Mockito.when(mockResponse.getEntity()).thenReturn(mockEntity);
+        InputStream responseContent = IOUtils.toInputStream("{\""+ElasticSearchTestConstants.EMPLOYEE_IDX+"\":{\"aliases\":{},\"mappings\":{\""+ElasticSearchConstants.DEFAULT_MAPPING+"\":{\"dynamic_templates\":[{\"disable_string_analyzing\":{\"match\":\"*\",\"match_mapping_type\":\"string\",\"mapping\":{\"index\":\"not_analyzed\",\"type\":\"string\"}}},{\"avoid_parsing_raws\":{\"match\":\"*Raw\",\"mapping\":{\"index\":\"not_analyzed\",\"type\":\"string\"}}}]}},\"settings\":{\"index\":{\"mapping\":{\"total_fields\":{\"limit\":\"10000\"}},\"number_of_shards\":\"11\",\"provided_name\":\"employee\",\"creation_date\":\"1491328427846\",\"number_of_replicas\":\"2\",\"uuid\":\"2WLTEDl6RAidfOPRsLwDZw\",\"version\":{\"created\":\"5030099\"}}}}}");
+        try {
+            Mockito.when(mockEntity.getContent()).thenReturn(responseContent);
+            Mockito.when(this.restClient.performRequest("GET", "/" + "employee")).thenReturn(mockResponse);
+
+            ElasticSearchTypeMappingLoader esil = new ElasticSearchTypeMappingLoader(this.plugin);
+            Collection<String> load = esil.load("employee");
+            TestCase.assertEquals(0, load.size());
         } finally {
             IOUtils.closeQuietly(responseContent);
         }
