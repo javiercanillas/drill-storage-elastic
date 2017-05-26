@@ -18,20 +18,23 @@
 
 package org.apache.drill.exec.store.elasticsearch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import org.apache.drill.common.exceptions.DrillRuntimeException;
 import org.apache.drill.common.exceptions.ExecutionSetupException;
 import org.apache.drill.common.expression.SchemaPath;
 import org.apache.drill.exec.physical.PhysicalOperatorSetupException;
-import org.apache.drill.exec.physical.base.AbstractGroupScan;
-import org.apache.drill.exec.physical.base.PhysicalOperator;
-import org.apache.drill.exec.physical.base.SubScan;
+import org.apache.drill.exec.physical.base.*;
 import org.apache.drill.exec.proto.CoordinationProtos;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.apache.drill.exec.store.StoragePluginRegistry;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +46,7 @@ public class ElasticSearchGroupScan extends AbstractGroupScan {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchGroupScan.class);
 
-    private final ElasticSearchStoragePlugin storagePlugin;
+    private final ElasticSearchStoragePlugin plugin;
     private final ElasticSearchPluginConfig storagePluginConfig;
     private final ElasticSearchScanSpec scanSpec;
     private final List<SchemaPath> columns;
@@ -61,16 +64,21 @@ public class ElasticSearchGroupScan extends AbstractGroupScan {
 
     public ElasticSearchGroupScan(String userName, ElasticSearchStoragePlugin plugin, ElasticSearchScanSpec scanSpec, List<SchemaPath> columns) {
         super(userName);
-        this.storagePlugin = plugin;
+        this.plugin = plugin;
         this.storagePluginConfig = plugin.getConfig();
         this.scanSpec = scanSpec;
         this.columns = columns;
-        this.watch  = Stopwatch.createUnstarted();
+        this.watch = Stopwatch.createUnstarted();
         init();
     }
 
     public ElasticSearchGroupScan(ElasticSearchGroupScan that) {
-        this(that.getUserName(), that.storagePlugin, that.scanSpec, that.columns);
+        this(that, that.columns);
+    }
+
+
+    public ElasticSearchGroupScan(ElasticSearchGroupScan that, List<SchemaPath> columns) {
+        this(that.getUserName(), that.plugin, that.scanSpec, columns);
     }
 
     private void init() {
@@ -90,7 +98,7 @@ public class ElasticSearchGroupScan extends AbstractGroupScan {
     @Override
     public SubScan getSpecificScan(int minorFragmentId) throws ExecutionSetupException {
         // TODO: What is minor fragmentation id ?
-        return new ElasticSearchSubScan(super.getUserName(), this.storagePlugin, this.storagePluginConfig, this.scanSpec, this.columns);
+        return new ElasticSearchSubScan(super.getUserName(), this.plugin, this.storagePluginConfig, this.scanSpec, this.columns);
     }
 
     @Override
@@ -107,5 +115,44 @@ public class ElasticSearchGroupScan extends AbstractGroupScan {
     public PhysicalOperator getNewWithChildren(List<PhysicalOperator> children) throws ExecutionSetupException {
         Preconditions.checkArgument(children.isEmpty());
         return new ElasticSearchGroupScan(this);
+    }
+
+    @Override
+    public GroupScan clone(List<SchemaPath> columns) {
+        ElasticSearchGroupScan clone = new ElasticSearchGroupScan(this, columns);
+        return clone;
+    }
+
+    @Override
+    public ScanStats getScanStats() {
+        Response response;
+        JsonNode jsonNode;
+        RestClient client = this.plugin.getClient();
+        try {
+            response = client.performRequest("GET", "/" + this.scanSpec.getIndexName() + "/" + this.scanSpec.getTypeMappingName() + "/_count");
+            jsonNode = JsonHelper.readRespondeContentAsJsonTree(this.plugin.getObjectMapper(), response);
+            JsonNode countNode = JsonHelper.getPath(jsonNode, "count");
+            long numDocs = 0;
+            if (!countNode.isMissingNode()) {
+                numDocs = countNode.longValue();
+            } else {
+                logger.warn("There are no documents in {}.{}?", this.scanSpec.getIndexName(), this.scanSpec.getTypeMappingName());
+            }
+            long docSize = 0;
+            if (numDocs > 0) {
+                response = client.performRequest("GET", "/" + this.scanSpec.getIndexName() + "/" + this.scanSpec.getTypeMappingName() + "/_search?size=1&terminate_after=1");
+                jsonNode = JsonHelper.readRespondeContentAsJsonTree(this.plugin.getObjectMapper(), response);
+                JsonNode hits = JsonHelper.getPath(jsonNode, "hits.hits");
+                if (!hits.isMissingNode()) {
+                    //TODO: Is there another elegant way to get the JsonNode Content?
+                    docSize = hits.elements().next().toString().getBytes().length;
+                } else {
+                    throw new DrillRuntimeException("Couldn't size any documents for " + this.scanSpec.getIndexName() + "." + this.scanSpec.getTypeMappingName());
+                }
+            }
+            return new ScanStats(ScanStats.GroupScanProperty.EXACT_ROW_COUNT, numDocs, 1, docSize * numDocs);
+        } catch (IOException e) {
+            throw new DrillRuntimeException(e.getMessage(), e);
+        }
     }
 }

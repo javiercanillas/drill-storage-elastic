@@ -47,7 +47,7 @@ public class ElasticSearchIndexLoader extends CacheLoader<String, Collection<Str
         Set<String> indexes = Sets.newHashSet();
         try {
             Response response = this.plugin.getClient().performRequest("GET", "/_aliases");
-            JsonNode jsonNode = this.plugin.getObjectMapper().readTree(response.getEntity().getContent());
+            JsonNode jsonNode = JsonHelper.readRespondeContentAsJsonTree(this.plugin.getObjectMapper(),response);
             Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> entry = fields.next();

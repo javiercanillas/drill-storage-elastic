@@ -43,7 +43,7 @@ public class ElasticSearchTypeMappingLoader extends CacheLoader<String, Collecti
         Set<String> typeMappings = Sets.newHashSet();
         try {
             Response response = this.plugin.getClient().performRequest("GET", "/" + idxName);
-            JsonNode jsonNode = this.plugin.getObjectMapper().readTree(response.getEntity().getContent());
+            JsonNode jsonNode = JsonHelper.readRespondeContentAsJsonTree(this.plugin.getObjectMapper(),response);
             Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> entry = fields.next();
