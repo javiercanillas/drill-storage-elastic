@@ -150,7 +150,7 @@ public class ElasticSearchGroupScan extends AbstractGroupScan {
                     throw new DrillRuntimeException("Couldn't size any documents for " + this.scanSpec.getIndexName() + "." + this.scanSpec.getTypeMappingName());
                 }
             }
-            return this.cacheScanStats = new ScanStats(ScanStats.GroupScanProperty.EXACT_ROW_COUNT, numDocs, 1, docSize * numDocs);
+            return new ScanStats(ScanStats.GroupScanProperty.EXACT_ROW_COUNT, numDocs, 1, docSize * numDocs);
         } catch (IOException e) {
             throw new DrillRuntimeException(e.getMessage(), e);
         }
