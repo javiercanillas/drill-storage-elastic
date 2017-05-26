@@ -27,6 +27,7 @@ import org.apache.drill.exec.store.AbstractRecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
 
 //TODO
@@ -37,11 +38,18 @@ public class ElasticSearchRecordReader extends AbstractRecordReader {
     public ElasticSearchRecordReader(ElasticSearchScanSpec elasticSearchScanSpec, List<SchemaPath> columns,
                                      FragmentContext context, ElasticSearchStoragePlugin elasticSearchStoragePlugin) {
         //TODO
+        logger.debug("TODO constructor");
+    }
+
+    @Override
+    protected Collection<SchemaPath> transformColumns(Collection<SchemaPath> projectedColumns) {
+        logger.debug("TODO transformColumns");
+        return null;
     }
 
     @Override
     public void setup(OperatorContext context, OutputMutator output) throws ExecutionSetupException {
-
+        logger.debug("TODO setup");
     }
 
     @Override
