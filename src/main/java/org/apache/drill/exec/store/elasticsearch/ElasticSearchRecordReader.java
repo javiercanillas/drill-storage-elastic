@@ -18,38 +18,66 @@
 
 package org.apache.drill.exec.store.elasticsearch;
 
+import com.google.common.collect.Sets;
 import org.apache.drill.common.exceptions.ExecutionSetupException;
 import org.apache.drill.common.expression.SchemaPath;
+import org.apache.drill.exec.ExecConstants;
 import org.apache.drill.exec.ops.FragmentContext;
 import org.apache.drill.exec.ops.OperatorContext;
 import org.apache.drill.exec.physical.impl.OutputMutator;
 import org.apache.drill.exec.store.AbstractRecordReader;
+import org.apache.drill.exec.vector.complex.impl.VectorContainerWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 //TODO
 public class ElasticSearchRecordReader extends AbstractRecordReader {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchRecordReader.class);
+    private final ElasticSearchStoragePlugin plugin;
+    private final FragmentContext fragmentContext;
+    private final boolean unionEnabled;
+    private Set<String> fields;
+    private OperatorContext operatorContext;
+    private VectorContainerWriter writer;
 
     public ElasticSearchRecordReader(ElasticSearchScanSpec elasticSearchScanSpec, List<SchemaPath> columns,
                                      FragmentContext context, ElasticSearchStoragePlugin elasticSearchStoragePlugin) {
         //TODO
+        this.fields = new HashSet<>();
+        this.plugin = elasticSearchStoragePlugin;
+        this.fragmentContext = context;
+        setColumns(columns);
+        //TODO: What does this mean?
+        this.unionEnabled = fragmentContext.getOptions().getOption(ExecConstants.ENABLE_UNION_TYPE);
         logger.debug("TODO constructor");
     }
 
     @Override
     protected Collection<SchemaPath> transformColumns(Collection<SchemaPath> projectedColumns) {
-        logger.debug("TODO transformColumns");
-        return null;
+        Set<SchemaPath> transformed = Sets.newLinkedHashSet();
+        //TODO: See if we can only poll for selected columns
+        if (!isStarQuery()) {
+            for (SchemaPath column : projectedColumns) {
+                String fieldName = column.getRootSegment().getPath();
+                transformed.add(column);
+                this.fields.add(fieldName);
+            }
+        } else {
+            transformed.add(AbstractRecordReader.STAR_COLUMN);
+        }
+        return transformed;
     }
 
     @Override
     public void setup(OperatorContext context, OutputMutator output) throws ExecutionSetupException {
-        logger.debug("TODO setup");
+        this.operatorContext = context;
+        this.writer = new VectorContainerWriter(output,this.unionEnabled);
     }
 
     @Override

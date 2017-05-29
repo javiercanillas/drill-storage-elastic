@@ -18,9 +18,12 @@
 
 package org.apache.drill.exec.store.elasticsearch;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import junit.framework.TestCase;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.MapUtils;
+import org.apache.drill.exec.store.elasticsearch.internal.ElasticSearchCursor;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
@@ -76,5 +79,20 @@ public class TestElasticSearchConnect {
         } finally {
             restClient.close();
         }
+    }
+
+    @Test
+    public void testRealCursoring() throws IOException {
+        ElasticSearchCursor esc = ElasticSearchCursor.scroll(this.createClient(null), new ObjectMapper(),"employee","developer", MapUtils.EMPTY_MAP, null);
+        TestCase.assertTrue(esc.hasNext());
+        int count=0;
+        while(esc.hasNext()) {
+            JsonNode next = esc.next();
+            TestCase.assertNotNull(next);
+            logger.info(next.toString());
+            count++;
+        }
+        TestCase.assertEquals(19,count);
+
     }
 }

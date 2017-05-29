@@ -25,19 +25,12 @@ import org.bson.Document;
 public class ElasticSearchScanSpec {
     private final String indexName;
     private final String typeMappingName;
-    private final Document filters;
 
     @JsonCreator
     public ElasticSearchScanSpec(@JsonProperty("indexName") String indexName,
                          @JsonProperty("typeMappingName") String typeMappingName) {
-        this(indexName, typeMappingName, null);
-    }
-
-    public ElasticSearchScanSpec(String indexName, String typeMappingName,
-                         Document filters) {
         this.indexName = indexName;
         this.typeMappingName = typeMappingName;
-        this.filters = filters;
     }
 
     public String getIndexName() {
@@ -48,14 +41,11 @@ public class ElasticSearchScanSpec {
         return typeMappingName;
     }
 
-    public Document getFilters() {
-        return filters;
-    }
 
     @Override
     public String toString() {
         return "ElasticSearchScanSpec [index=" + this.indexName + ", typeMapping="
-                + this.typeMappingName + ", filters=" + filters + "]";
+                + this.typeMappingName + "]";
     }
 
 }
