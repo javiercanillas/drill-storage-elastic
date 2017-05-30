@@ -42,7 +42,7 @@
   </appender>
 
   <logger name="org.apache.drill" additivity="false">
-    <level value="info" />
+    <level value="debug" />
     <appender-ref ref="FILE" />
   </logger>
 

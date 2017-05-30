@@ -111,7 +111,7 @@ public class ElasticSearchStoragePlugin extends AbstractStoragePlugin {
 
     @Override
     public AbstractGroupScan getPhysicalScan(String userName, JSONOptions selection) throws IOException {
-        ElasticSearchScanSpec elasticSearchScanSpec = selection.getListWith(new ObjectMapper(), new TypeReference<ElasticSearchScanSpec>() {});
+        ElasticSearchScanSpec elasticSearchScanSpec = selection.getListWith(this.getObjectMapper(), new TypeReference<ElasticSearchScanSpec>() {});
         return new ElasticSearchGroupScan(userName, this, elasticSearchScanSpec, null);
     }
 

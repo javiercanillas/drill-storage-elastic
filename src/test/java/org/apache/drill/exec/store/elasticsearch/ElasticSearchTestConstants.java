@@ -20,9 +20,11 @@ package org.apache.drill.exec.store.elasticsearch;
 
 public class ElasticSearchTestConstants {
 
-    public static final String TEST_BOOLEAN_FILTER_QUERY_TEMPLATE1 = "select count(*) from elasticsearch.%s.`%s`";
+    public static final String TEST_BOOLEAN_FILTER_QUERY_TEMPLATE1 = "select `name` from elasticsearch.%s.`%s`";
     public static final String EMPLOYEE_IDX = "employee";
     public static final String DEVELOPER_MAPPING = "developer";
     public static final String MANAGER_MAPPING = "manager";
     public static final String TEST_BOOLEAN_FILTER_QUERY_TEMPLATE2 = "select `employeeId` from elasticsearch.%s.`%s` where reportsTo = false";
+    public static final String TEST_SELECT_ALL_QUERY_TEMPLATE = "select * from elasticsearch.%s.`%s`";
+    public static final String TEST_SELECT_IDNAMES_QUERY_TEMPLATE = "select `_id`,`_source.names` from elasticsearch.%s.`%s`";
 }

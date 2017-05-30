@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.drill.exec.store.elasticsearch;
+package org.apache.drill.exec.store.elasticsearch.internal;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,11 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import junit.framework.TestCase;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.drill.exec.store.elasticsearch.internal.ElasticSearchCursor;
-import org.apache.http.Header;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchTestConstants;
 import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.junit.Before;
@@ -61,7 +58,7 @@ public class ElasticSearchCursorTest {
         Mockito.when(mockEntityFirstScroll.getContent()).thenReturn(responseFirstScroll);
 
         Mockito.when(this.restClient.performRequest(Mockito.eq("POST"),
-                Mockito.eq("/"+ElasticSearchTestConstants.EMPLOYEE_IDX+"/"+ElasticSearchTestConstants.DEVELOPER_MAPPING+"/_search"),
+                Mockito.eq("/"+ ElasticSearchTestConstants.EMPLOYEE_IDX+"/"+ElasticSearchTestConstants.DEVELOPER_MAPPING+"/_search"),
                 Mockito.any(Map.class),
                 Mockito.any(HttpEntity.class)))
                 .thenReturn(mockResponseFirstScroll);

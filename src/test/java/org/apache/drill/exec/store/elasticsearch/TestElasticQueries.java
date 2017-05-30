@@ -24,18 +24,32 @@ import org.junit.Test;
 @Ignore("It requires an elasticsearch server running on localhost, port 9200 with init-script.sh script run on it")
 public class TestElasticQueries extends ElasticTestBase {
 
-    @Test
+    //@Test
     public void testPluginIsLoaded() {
         //DO NOTHING
     }
+    @Test
+    public void testGetAllDevelopers() throws Exception {
+        String queryString = String.format(ElasticSearchTestConstants.TEST_SELECT_ALL_QUERY_TEMPLATE,
+                ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.DEVELOPER_MAPPING);
+        runElasticSearchSQLVerifyCount(queryString, 19);
+    }
 
     @Test
+    public void testGetAllDevelopersIDsAndNames() throws Exception {
+        String queryString = String.format(ElasticSearchTestConstants.TEST_SELECT_IDNAMES_QUERY_TEMPLATE,
+                ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.DEVELOPER_MAPPING);
+        runElasticSearchSQLVerifyCount(queryString, 19);
+    }
+
+    //@Test
     public void testBooleanFilter() throws Exception {
         String queryString = String.format(ElasticSearchTestConstants.TEST_BOOLEAN_FILTER_QUERY_TEMPLATE1,
                 ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.DEVELOPER_MAPPING);
-        runElasticSearchSQLVerifyCount(queryString, 11);
+        runElasticSearchSQLVerifyCount(queryString, 19);
         queryString = String.format(ElasticSearchTestConstants.TEST_BOOLEAN_FILTER_QUERY_TEMPLATE2,
                 ElasticSearchTestConstants.EMPLOYEE_IDX, ElasticSearchTestConstants.DEVELOPER_MAPPING);
         runElasticSearchSQLVerifyCount(queryString, 8);
+
     }
 }
