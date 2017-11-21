@@ -48,27 +48,27 @@ public class ElasticSearchSubScan extends AbstractBase implements SubScan {
     @JsonProperty
     private final ElasticSearchPluginConfig elasticSearchPluginConfig;
     private final List<SchemaPath> columns;
-    private final ElasticSearchScanSpec elasticSearchScanSpec;
+    private final List<ElasticSearchScanSpec> elasticSearchScanSpecs;
 
     @JsonCreator
     public ElasticSearchSubScan(
             @JacksonInject StoragePluginRegistry registry,
             @JsonProperty("userName") String userName,
             @JsonProperty("elasticSearchPluginConfig") ElasticSearchPluginConfig elasticSearchPluginConfig,
-            @JsonProperty("ElasticSearchScanSpec")  ElasticSearchScanSpec elasticSearchScanSpec,
+            @JsonProperty("ElasticSearchScanSpecs")  List<ElasticSearchScanSpec> elasticSearchScanSpecs,
             @JsonProperty("columns") List<SchemaPath> columns) throws ExecutionSetupException {
         this(userName, (ElasticSearchStoragePlugin) registry.getPlugin(elasticSearchPluginConfig),
-                elasticSearchPluginConfig, elasticSearchScanSpec, columns);
+                elasticSearchPluginConfig, elasticSearchScanSpecs, columns);
     }
 
     public ElasticSearchSubScan(String userName,
                                 ElasticSearchStoragePlugin elasticSearchStoragePlugin,
                                 ElasticSearchPluginConfig elasticSearchPluginConfig,
-                                ElasticSearchScanSpec elasticSearchScanSpec,
+                                List<ElasticSearchScanSpec> elasticSearchScanSpecs,
                                 List<SchemaPath> columns) {
         super(userName);
         this.columns = columns;
-        this.elasticSearchScanSpec = elasticSearchScanSpec;
+        this.elasticSearchScanSpecs = elasticSearchScanSpecs;
         this.elasticSearchStoragePlugin = elasticSearchStoragePlugin;
         this.elasticSearchPluginConfig = elasticSearchPluginConfig;
     }
@@ -82,7 +82,7 @@ public class ElasticSearchSubScan extends AbstractBase implements SubScan {
     public PhysicalOperator getNewWithChildren(List<PhysicalOperator> children) throws ExecutionSetupException {
         Preconditions.checkArgument(children.isEmpty());
         return new ElasticSearchSubScan(super.getUserName(), this.elasticSearchStoragePlugin,
-                this.elasticSearchPluginConfig, this.elasticSearchScanSpec, this.columns);
+                this.elasticSearchPluginConfig, this.elasticSearchScanSpecs, this.columns);
     }
 
     @Override
@@ -110,7 +110,8 @@ public class ElasticSearchSubScan extends AbstractBase implements SubScan {
         return columns;
     }
 
-    public ElasticSearchScanSpec getElasticSearchScanSpec() {
-        return elasticSearchScanSpec;
+    // this should scan for many spec
+    public  List<ElasticSearchScanSpec> getElasticSearchScanSpecs() {
+        return elasticSearchScanSpecs;
     }
 }

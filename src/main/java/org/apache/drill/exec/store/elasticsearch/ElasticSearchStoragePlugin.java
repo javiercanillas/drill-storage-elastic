@@ -17,20 +17,25 @@
  */
 package org.apache.drill.exec.store.elasticsearch;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Set;
+
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.drill.common.JSONOptions;
-import org.apache.drill.exec.store.elasticsearch.schema.ElasticSearchSchemaFactory;
+import org.apache.drill.exec.ops.OptimizerRulesContext;
 import org.apache.drill.exec.physical.base.AbstractGroupScan;
 import org.apache.drill.exec.server.DrillbitContext;
 import org.apache.drill.exec.store.AbstractStoragePlugin;
 import org.apache.drill.exec.store.SchemaConfig;
+import org.apache.drill.exec.store.StoragePluginOptimizerRule;
+import org.apache.drill.exec.store.elasticsearch.schema.ElasticSearchSchemaFactory;
 import org.elasticsearch.client.RestClient;
 //import org.elasticsearch.client.Client;
 //import org.elasticsearch.client.transport.TransportClient;
 
-import java.io.IOException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Main ElasticSearch Plugin class to configure storage instance
@@ -59,6 +64,10 @@ public class ElasticSearchStoragePlugin extends AbstractStoragePlugin {
 
         this.schemaFactory = new ElasticSearchSchemaFactory(this, name, this.config.getCacheDuration(), this.config.getCacheTimeUnit());
     }
+    
+    public DrillbitContext getContext() {
+        return this.context;
+      }
 
     /**
      *
@@ -115,6 +124,13 @@ public class ElasticSearchStoragePlugin extends AbstractStoragePlugin {
         return new ElasticSearchGroupScan(userName, this, elasticSearchScanSpec, null);
     }
 
+    @Override
+    public Set<StoragePluginOptimizerRule> getPhysicalOptimizerRules(OptimizerRulesContext optimizerRulesContext) {
+  	  // 创建优化器
+      return ImmutableSet.of(MongoPushDownFilterForScan.INSTANCE);
+    }
+    
+    
     public RestClient getClient() { return this.client; }
 
     public ElasticSearchSchemaFactory getSchemaFactory() {

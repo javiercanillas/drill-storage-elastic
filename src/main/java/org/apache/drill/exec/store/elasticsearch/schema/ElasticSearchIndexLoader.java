@@ -50,6 +50,7 @@ public class ElasticSearchIndexLoader extends CacheLoader<String, Collection<Str
         }
         Set<String> indexes = Sets.newHashSet();
         try {
+        	// 拉取所有的表回来
             Response response = this.plugin.getClient().performRequest("GET", "/_aliases");
             JsonNode jsonNode = JsonHelper.readRespondeContentAsJsonTree(this.plugin.getObjectMapper(),response);
             Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
@@ -63,6 +64,7 @@ public class ElasticSearchIndexLoader extends CacheLoader<String, Collection<Str
                         indexes.add(aliasesIterator.next());
                     }
                 } else {
+                	// 所有的索引数据
                     indexes.add(entry.getKey());
                 }
             }

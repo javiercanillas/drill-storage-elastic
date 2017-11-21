@@ -21,10 +21,13 @@ package org.apache.drill.exec.store.elasticsearch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+
 import org.elasticsearch.client.Response;
 
 import javax.validation.constraints.NotNull;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -44,6 +47,7 @@ public class JsonHelper {
         Preconditions.checkArgument(path != null);
         Iterator<String> fieldIterator = Arrays.asList(path.split("\\.")).iterator();
         JsonNode innerNode = node;
+        // 一层一层下去
         while (!innerNode.isMissingNode() && fieldIterator.hasNext()) {
             node = node.path(fieldIterator.next());
         }
@@ -56,6 +60,13 @@ public class JsonHelper {
         Preconditions.checkArgument(response != null);
         Preconditions.checkArgument(response.getEntity() != null);
         Preconditions.checkArgument(response.getEntity().getContent() != null);
+        // 读取数据
         return mapper.readTree(response.getEntity().getContent());
+    }
+    
+    public static JsonNode readRespondeContentAsJsonTree(ObjectMapper mapper, InputStream in) throws IOException {
+        Preconditions.checkArgument(mapper != null);
+        // 读取数据
+        return mapper.readTree(in);
     }
 }

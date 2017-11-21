@@ -36,26 +36,29 @@ import java.util.List;
 
 public class ElasticSearchBatchCreator implements BatchCreator<ElasticSearchSubScan> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ElasticSearchBatchCreator.class);
+	private static final Logger logger = LoggerFactory.getLogger(ElasticSearchBatchCreator.class);
 
-    @Override
-    public CloseableRecordBatch getBatch(FragmentContext context, ElasticSearchSubScan subScan, List<RecordBatch> children) throws ExecutionSetupException {
-        Preconditions.checkArgument(children.isEmpty());
-        List<RecordReader> readers = Lists.newArrayList();
-        List<SchemaPath> columns = null;
-        if ((columns = subScan.getColumns()) == null) {
-            columns = GroupScan.ALL_COLUMNS;
-        }
-        try {
-        readers.add(new ElasticSearchRecordReader(subScan.getElasticSearchScanSpec(),
-                columns, context, subScan.getElasticSearchStoragePlugin()));
-        } catch (Exception e) {
-            logger.error("ElasticSearchRecordReader creation failed for subScan:  "
-                    + subScan + ".");
-            logger.error(e.getMessage(), e);
-            throw new ExecutionSetupException(e);
-        }
-        logger.info("Number of record readers initialized : " + readers.size());
-        return new ScanBatch(subScan, context, readers.iterator());
-    }
+	@Override
+	public CloseableRecordBatch getBatch(FragmentContext context, ElasticSearchSubScan subScan,
+			List<RecordBatch> children) throws ExecutionSetupException {
+		Preconditions.checkArgument(children.isEmpty());
+		List<RecordReader> readers = Lists.newArrayList();
+		List<SchemaPath> columns = null;
+		if ((columns = subScan.getColumns()) == null) {
+			columns = GroupScan.ALL_COLUMNS;
+		}
+		try {
+			for (ElasticSearchScanSpec spec : subScan.getElasticSearchScanSpecs()) {
+				// 这里应该批量读取数据的
+				readers.add(new ElasticSearchRecordReader(spec, columns, context, subScan
+						.getElasticSearchStoragePlugin()));
+			}
+		} catch (Exception e) {
+			logger.error("ElasticSearchRecordReader creation failed for subScan:  " + subScan + ".");
+			logger.error(e.getMessage(), e);
+			throw new ExecutionSetupException(e);
+		}
+		logger.info("Number of record readers initialized : " + readers.size());
+		return new ScanBatch(subScan, context, readers.iterator());
+	}
 }

@@ -19,7 +19,7 @@
 package org.apache.drill.exec.store.elasticsearch;
 
 
-public class ElasticSearchConstants {
+public interface ElasticSearchConstants {
 
     public static final String INDEXES = "indexes";
     public static final String TYPES = "types";

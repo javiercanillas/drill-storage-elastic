@@ -42,11 +42,13 @@ public class ElasticSearchSchemaFactory implements SchemaFactory {
         this.schemaName = schemaName;
         this.plugin = plugin;
 
+        // index 
         this.indexCache = CacheBuilder //
                 .newBuilder() //
                 .expireAfterAccess(cacheDuration, cacheTimeUnit) //
                 .build(new ElasticSearchIndexLoader(this.plugin));
 
+        // index map type 
         this.typeMappingCache = CacheBuilder //
                 .newBuilder() //
                 .expireAfterAccess(cacheDuration, cacheTimeUnit) //
