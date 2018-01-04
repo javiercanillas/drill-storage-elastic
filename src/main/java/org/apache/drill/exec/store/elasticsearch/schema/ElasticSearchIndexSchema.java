@@ -51,6 +51,7 @@ public class ElasticSearchIndexSchema extends AbstractSchema {
         }
 
         if (! drillTables.containsKey(tableName)) {
+        	// 去拉取这个表数据 this.name == 'es' .
             drillTables.put(tableName, elasticSearchSchema.getDrillTable(this.name, tableName));
         }
 

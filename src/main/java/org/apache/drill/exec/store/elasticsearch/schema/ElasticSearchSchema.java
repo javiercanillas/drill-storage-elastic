@@ -18,20 +18,24 @@
 
 package org.apache.drill.exec.store.elasticsearch.schema;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
+import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.schema.Table;
+import org.apache.drill.exec.planner.logical.DrillTable;
+import org.apache.drill.exec.store.AbstractSchema;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchConstants;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchPluginConfig;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchScanSpec;
+import org.apache.drill.exec.store.elasticsearch.ElasticSearchStoragePlugin;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.calcite.schema.SchemaPlus;
-import org.apache.drill.exec.store.elasticsearch.ElasticSearchPluginConfig;
-import org.apache.drill.exec.store.elasticsearch.ElasticSearchStoragePlugin;
-import org.apache.drill.exec.store.elasticsearch.ElasticSearchConstants;
-import org.apache.drill.exec.store.elasticsearch.ElasticSearchScanSpec;
-import org.apache.drill.exec.planner.logical.DrillTable;
-import org.apache.drill.exec.planner.logical.DynamicDrillTable;
-import org.apache.drill.exec.store.AbstractSchema;
-
-import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 public class ElasticSearchSchema extends AbstractSchema {
 
@@ -52,10 +56,12 @@ public class ElasticSearchSchema extends AbstractSchema {
 
     @Override
     public AbstractSchema getSubSchema(String name) {
+    	// 拿这个索引的 元数据类型
         Collection<String> typeMappings;
         try {
             if ( !this.schemaMap.containsKey(name)){
                 typeMappings = this.plugin.getSchemaFactory().getTypeMappingCache().get(name);
+                // index --> type map元数据类型
                 this.schemaMap.put(name, new ElasticSearchIndexSchema(typeMappings, this, name));
             }
 
@@ -72,6 +78,13 @@ public class ElasticSearchSchema extends AbstractSchema {
             plusOfThis.add(s, getSubSchema(s));
         }
     }
+    
+    @Override
+    public Table getTable(String tableName){
+    	logger.info(String.format("table = [%s]", tableName));
+    	// 默认是索引表名
+      return this.getDrillTable(tableName, "");
+    }
 
     @Override
     public boolean showInInformationSchema() {
@@ -81,6 +94,7 @@ public class ElasticSearchSchema extends AbstractSchema {
     @Override
     public Set<String> getSubSchemaNames() {
         try {
+        	// get es all index
             return Sets.newHashSet(this.plugin.getSchemaFactory().getIndexCache().get(ElasticSearchConstants.INDEXES));
         } catch (ExecutionException e) {
             logger.warn("Failure while getting ElasticSearch index list.", e);
@@ -88,8 +102,9 @@ public class ElasticSearchSchema extends AbstractSchema {
         }
     }
 
-    public DrillTable getDrillTable(String name, String tableName) {
-        ElasticSearchScanSpec elasticSearchScanSpec = new ElasticSearchScanSpec(name, tableName);
-        return new DynamicDrillTable(this.plugin, this.plugin.getSchemaFactory().getSchemaName(), null, elasticSearchScanSpec);
+    public DrillTable getDrillTable(String indexName, String typeMappingName) {
+    	//    get indexName/typeMappingName
+        ElasticSearchScanSpec elasticSearchScanSpec = new ElasticSearchScanSpec(indexName, typeMappingName);
+        return new DrillElasticsearchTable(this.plugin, this.plugin.getSchemaFactory().getSchemaName(), null, elasticSearchScanSpec);
     }
 }

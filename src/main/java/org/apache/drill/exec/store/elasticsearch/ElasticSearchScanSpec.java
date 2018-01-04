@@ -18,34 +18,69 @@
 
 package org.apache.drill.exec.store.elasticsearch;
 
+import org.elasticsearch.hadoop.rest.RestService.PartitionDefinition;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.bson.Document;
 
 public class ElasticSearchScanSpec {
-    private final String indexName;
-    private final String typeMappingName;
+	private final String indexName;
+	private final String typeMappingName;
+	private PartitionDefinition partitionDefinition;
+	private String filters;
+	private String queryFilter;
 
-    @JsonCreator
-    public ElasticSearchScanSpec(@JsonProperty("indexName") String indexName,
-                         @JsonProperty("typeMappingName") String typeMappingName) {
-        this.indexName = indexName;
-        this.typeMappingName = typeMappingName;
-    }
+	@JsonCreator
+	public ElasticSearchScanSpec(@JsonProperty("indexName") String indexName,
+			@JsonProperty("typeMappingName") String typeMappingName) {
+		this.indexName = indexName;
+		this.typeMappingName = typeMappingName;
 
-    public String getIndexName() {
-        return this.indexName;
-    }
+	}
 
-    public String getTypeMappingName() {
-        return typeMappingName;
-    }
+	@JsonCreator
+	public ElasticSearchScanSpec(String indexName, String typeMappingName, PartitionDefinition partitionDefinition) {
+		this.indexName = indexName;
+		this.typeMappingName = typeMappingName;
+		this.partitionDefinition = partitionDefinition;
+	}
+	
 
+	@JsonCreator
+	public ElasticSearchScanSpec(String indexName, String typeMappingName, PartitionDefinition partitionDefinition, String queryFilter) {
+		this.indexName = indexName;
+		this.typeMappingName = typeMappingName;
+		this.partitionDefinition = partitionDefinition;
+		this.queryFilter = queryFilter;
+	}
 
-    @Override
-    public String toString() {
-        return "ElasticSearchScanSpec [index=" + this.indexName + ", typeMapping="
-                + this.typeMappingName + "]";
-    }
+	public String getIndexName() {
+		return this.indexName;
+	}
+
+	public String getTypeMappingName() {
+		return typeMappingName;
+	}
+
+	public String getFilters() {
+		return filters;
+	}
+
+	public void setFilters(String filters) {
+		this.filters = filters;
+	}
+
+	public PartitionDefinition getPartitionDefinition() {
+		return partitionDefinition;
+	}
+
+	public void setPartitionDefinition(PartitionDefinition partitionDefinition) {
+		this.partitionDefinition = partitionDefinition;
+	}
+
+	@Override
+	public String toString() {
+		return "ElasticSearchScanSpec [index=" + this.indexName + ", typeMapping=" + this.typeMappingName + "]";
+	}
 
 }

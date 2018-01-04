@@ -77,6 +77,7 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
                                      @JsonProperty(value = "cacheDuration") long cacheDuration,
                                      @JsonProperty(value = "cacheTimeUnit") TimeUnit cacheTimeUnit) {
         if (!StringUtils.isEmpty(credentials)) {
+        	// 帐号密码
             this.credentials = credentials;
         } else {
             this.credentials = null;
@@ -152,6 +153,7 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
      */
     @JsonIgnore
     public RestClient createClient() {
+    	// 创建客户端了
         RestClientBuilder clientBuilder = RestClient.builder( this.parseHostsAndPorts());
 
         Header[] headers = this.buildHeaders();
@@ -162,6 +164,7 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
             clientBuilder.setMaxRetryTimeoutMillis(this.maxRetryTimeoutMillis);
         }
         if (!StringUtils.isEmpty(this.pathPrefix)) {
+        	// 请求路径前缀
             clientBuilder.setPathPrefix(this.pathPrefix);
         }
         return clientBuilder.build();
@@ -172,6 +175,7 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
         if (!StringUtils.isEmpty(this.credentials)) {
             headers.add(new BasicHeader("Authorization", "Basic " + Base64.encodeBase64String(this.credentials.getBytes())));
         }
+        // 帐号密码
         return (headers.isEmpty() ? null : (Header[]) headers.toArray());
     }
 
@@ -186,6 +190,7 @@ public class ElasticSearchPluginConfig extends StoragePluginConfigBase {
             if (split.length > 2) {
                 port = Integer.parseInt(split[2]);
             }
+            // 主机节点
             rtnValue.add(new HttpHost(host, port, protocol));
         }
         return rtnValue.toArray(new HttpHost[0]);

@@ -21,14 +21,18 @@ package org.apache.drill.exec.store.elasticsearch.schema;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
+
 import org.apache.drill.common.exceptions.DrillRuntimeException;
 import org.apache.drill.exec.store.elasticsearch.ElasticSearchConstants;
 
 import com.google.common.cache.CacheLoader;
+
 import org.apache.drill.exec.store.elasticsearch.ElasticSearchStoragePlugin;
 import org.apache.drill.exec.store.elasticsearch.JsonHelper;
 import org.elasticsearch.client.Response;
+import org.hamcrest.core.IsInstanceOf;
 
 public class ElasticSearchIndexLoader extends CacheLoader<String, Collection<String>> {
 
@@ -46,18 +50,21 @@ public class ElasticSearchIndexLoader extends CacheLoader<String, Collection<Str
         }
         Set<String> indexes = Sets.newHashSet();
         try {
+        	// 拉取所有的表回来
             Response response = this.plugin.getClient().performRequest("GET", "/_aliases");
             JsonNode jsonNode = JsonHelper.readRespondeContentAsJsonTree(this.plugin.getObjectMapper(),response);
             Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> entry = fields.next();
                 JsonNode aliases = JsonHelper.getPath(entry.getValue(), "aliases");
-                if (!aliases.isMissingNode()) {
+                // 2.3.3 版本拉取回来的索引是这种状态 ObjectNode 为空的
+                if (!aliases.isMissingNode()  && !(aliases instanceof ObjectNode) ) {
                     Iterator<String> aliasesIterator = aliases.fieldNames();
                     while (aliasesIterator.hasNext()) {
                         indexes.add(aliasesIterator.next());
                     }
                 } else {
+                	// 所有的索引数据
                     indexes.add(entry.getKey());
                 }
             }

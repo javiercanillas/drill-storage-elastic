@@ -42,11 +42,13 @@ public class ElasticSearchSchemaFactory implements SchemaFactory {
         this.schemaName = schemaName;
         this.plugin = plugin;
 
+        // index 
         this.indexCache = CacheBuilder //
                 .newBuilder() //
                 .expireAfterAccess(cacheDuration, cacheTimeUnit) //
                 .build(new ElasticSearchIndexLoader(this.plugin));
 
+        // index map type 
         this.typeMappingCache = CacheBuilder //
                 .newBuilder() //
                 .expireAfterAccess(cacheDuration, cacheTimeUnit) //
@@ -55,6 +57,7 @@ public class ElasticSearchSchemaFactory implements SchemaFactory {
 
     @Override
     public void registerSchemas(SchemaConfig schemaConfig, SchemaPlus parent) throws IOException {
+    	// 这里注册进去了
         ElasticSearchSchema schema = new ElasticSearchSchema(this.schemaName, this.plugin);
         SchemaPlus hPlus = parent.add(schemaName, schema);
         schema.setHolder(hPlus);
